@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="no">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>landjepik static map</title>
+    <style>
+      :root { color-scheme: light dark; --bg: #f7f7f8; --fg: #1a1a1a; --muted: #666; --card: #fff; --border: #ddd; }
+      @media (prefers-color-scheme: dark) { :root { --bg: #151517; --fg: #eee; --muted: #999; --card: #1f1f22; --border: #333; } }
+      body { margin: 0; font: 15px/1.5 system-ui, sans-serif; background: var(--bg); color: var(--fg); }
+      main { max-width: 760px; margin: 0 auto; padding: 32px 16px; }
+      h1 { font-size: 22px; margin: 0 0 4px; }
+      p { color: var(--muted); margin: 0 0 24px; }
+      form { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+      label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+      input, select { font: inherit; padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); color: var(--fg); min-width: 0; }
+      .url { display: flex; gap: 8px; margin-bottom: 16px; }
+      .url code { flex: 1; padding: 8px; background: var(--card); border: 1px solid var(--border); border-radius: 6px; overflow-x: auto; white-space: nowrap; font-size: 13px; }
+      button { font: inherit; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--card); color: var(--fg); cursor: pointer; }
+      figure { margin: 0; }
+      img { display: block; max-width: 100%; height: auto; border-radius: 6px; border: 1px solid var(--border); }
+      figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; min-height: 1.5em; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Static map</h1>
+      <p>Bilde generert av <code>/api/staticmap</code>. Endre verdiene for å se resultatet.</p>
+      <form id="form">
+        <label>lat <input name="lat" type="number" step="any" value="59.9139" /></label>
+        <label>lon <input name="lon" type="number" step="any" value="10.7522" /></label>
+        <label>zoom <input name="zoom" type="number" min="0" max="19" value="14" /></label>
+        <label>width <input name="width" type="number" min="16" max="1280" value="600" /></label>
+        <label>height <input name="height" type="number" min="16" max="1280" value="400" /></label>
+        <label>provider
+          <select name="provider">
+            <option value="osm">osm</option>
+            <option value="kartverket">kartverket</option>
+            <option value="kartverket-grey">kartverket-grey</option>
+            <option value="kartverket-raster">kartverket-raster</option>
+            <option value="kartverket-sea">kartverket-sea</option>
+          </select>
+        </label>
+        <label>color <input name="color" type="color" value="#e11d48" /></label>
+        <label>format
+          <select name="format"><option>png</option><option>jpeg</option><option>webp</option></select>
+        </label>
+      </form>
+      <div class="url"><code id="url"></code><button type="button" id="copy">Kopier</button></div>
+      <figure>
+        <img id="img" alt="Kart" width="600" height="400" />
+        <figcaption id="status"></figcaption>
+      </figure>
+    </main>
+    <script>
+      const form = document.getElementById('form')
+      const img = document.getElementById('img')
+      const url = document.getElementById('url')
+      const status = document.getElementById('status')
+      let timer
+
+      function update() {
+        const data = new FormData(form)
+        const params = new URLSearchParams()
+        for (const [k, v] of data) params.set(k, k === 'color' ? String(v).slice(1) : String(v))
+        const src = `/api/staticmap?${params}`
+        url.textContent = location.origin + src
+        img.width = Number(params.get('width'))
+        img.height = Number(params.get('height'))
+        status.textContent = 'Laster …'
+        const t0 = performance.now()
+        img.onload = () => (status.textContent = `Ferdig på ${Math.round(performance.now() - t0)} ms`)
+        img.onerror = async () => {
+          const res = await fetch(src).catch(() => null)
+          status.textContent = res ? `Feil ${res.status}: ${await res.text()}` : 'Feil ved lasting'
+        }
+        img.src = src
+      }
+
+      form.addEventListener('input', () => {
+        clearTimeout(timer)
+        timer = setTimeout(update, 400)
+      })
+      document.getElementById('copy').addEventListener('click', () => navigator.clipboard.writeText(url.textContent))
+      update()
+    </script>
+  </body>
+</html>

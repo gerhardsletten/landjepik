@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "npm --prefix ../.. install && npm --prefix ../.. run build && npm install",
+  "buildCommand": "",
+  "outputDirectory": "public",
+  "regions": ["arn1"],
+  "functions": {
+    "api/staticmap.ts": { "maxDuration": 15 }
+  }
+}

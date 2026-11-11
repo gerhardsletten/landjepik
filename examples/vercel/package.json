@@ -1,0 +1,13 @@
+{
+  "name": "landjepik-vercel-example",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@napi-rs/canvas": "1.0.13",
+    "landjepik": "file:../.."
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2"
+  }
+}
