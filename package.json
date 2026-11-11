@@ -8,6 +8,10 @@
     "dist",
     "src/fonts/Inter-LICENSE.txt"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gerhardsletten/landjepik.git"
+  },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
